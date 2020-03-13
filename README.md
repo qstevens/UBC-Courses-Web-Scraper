@@ -9,9 +9,9 @@ After completing a synchronous implementation of the web scraper in Python, I re
 ## Results
 I tested the scrapers by running it on the UBC 2020S session. This set has a total of ~7000 pages to scrape. 
 The results of the asynchronous web scrapers are as follows:
-Python - grequests: 360s
-Python - aiohttp: 163s
-JavaScript - request-promise: 60s
+- Python - grequests: 360s
+- Python - aiohttp: 163s
+- JavaScript - request-promise: 60s
 
 ## Conclusion
 From these results I concluded that either I am missing an significant optimization for handling asynchronous requests in Python (which is possible because this is the first program I've written in Python) or that JavaScript runs much faster. Either way, this marks the end of the Python experiment for web scrapers for me.
