@@ -1,7 +1,7 @@
 class Subject:
+    
     def __init__(self):
         super().__init__()
-
 
 def get_subjects_from_soup(soup):
     subjects = []
@@ -24,6 +24,6 @@ def get_subjects_from_soup(soup):
         else:
             subject.code = row_cols[0].find("a").get_text()
             subject.link = row_cols[0].find("a").get("href")
-            subjects.append(subject)
+        subjects.append(subject)
 
     return subjects

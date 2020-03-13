@@ -1,7 +1,7 @@
 class Section:
     def __init__(self):
         super().__init__()
-
+        
 def get_sections_from_soup(soup):
 
     sections = []

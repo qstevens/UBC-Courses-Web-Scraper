@@ -1,6 +1,8 @@
 import requests
 import urllib.parse
 from bs4 import BeautifulSoup
+import json
+import jsonpickle
 import asyncio
 from aiohttp import ClientSession
 import time
@@ -83,12 +85,13 @@ async def fetch(url, session):
 
 async def main():
     async with ClientSession() as c_session:
+        tasks = []
 
         start_time = time.time()
 
-        subjects_map = {}
-        courses_map = {}
-        sections_map = {}
+        subjects = []
+        courses = []
+        sections = []
 
         # Select Session Year and Term
         ubc_courses_url = format_url()
@@ -102,47 +105,43 @@ async def main():
         subjects = get_subjects_from_soup(subjects_soup)
 
         end_subjects_time = time.time()
+
         # Get all Courses for Subjects - Async
         for subject in subjects:
             # print(subject.code)
-            subjects_map[format_url(session, subject.code)] = subject
-        print("Subjects:", len(subjects_map.keys()))
-      
-        tasks = []
-
-        for url in subjects_map.keys():
-            task = asyncio.create_task(fetch(url, c_session))
+            subject_url = format_url(session, subject.code)
+            task = asyncio.create_task(fetch(subject_url, c_session))
             tasks.append(task)
-
         requests = await asyncio.gather(*tasks)
 
+        print("Subjects:", len(subjects))
+
+        tasks = []
         for i in range(len(requests)):
             # print(response.url)
-            subject = subjects_map[list(subjects_map.keys())[i]]
+            subject = subjects[i]
             subject_courses_soup = BeautifulSoup(requests[i], 'lxml')
             subject.courses = get_courses_from_subjects_soup(subject_courses_soup)
 
             # Save Course hrefs for Async Requests
             for course in subject.courses:
-                # print(course.course_name)
-                courses_map[format_url(session, course.subject_code, course.course_number)] = course
-        print("Courses:", len(courses_map.keys()))
+                # print(course.course_name)                
+                courses.append(course)
+                course_url = format_url(session, course.subject_code, course.course_number)
+                task = asyncio.create_task(fetch(course_url, c_session))
+                tasks.append(task)
 
         end_courses_time = time.time()
-
-        # Get all Sections for Courses - Async     
-        tasks = []
-
-        for url in courses_map.keys():
-            task = asyncio.create_task(fetch(url, c_session))
-            tasks.append(task)
         
-        requests = await asyncio.gather(*tasks)
+        requests = await asyncio.gather(*tasks)        
+
+        print("Courses:", len(courses))
+        tasks = []
 
         for i in range(len(requests)):
         # for response in requests:
-            # print(response.url)
-            course = courses_map[list(courses_map.keys())[i]]
+            course = courses[i]
+            # print(course.course_name)
             courses_soup = BeautifulSoup(requests[i], "lxml")
             course.sections = get_sections_from_soup(courses_soup)
 
@@ -151,24 +150,21 @@ async def main():
             
             # Save Section hrefs for Async Requests
             for section in course.sections:
-                sections_map[format_url(session, section.subject_code, section.course_number, section.section_number)] = section
+                sections.append(section)
+                section_url = format_url(session, section.subject_code, section.course_number, section.section_number)
+                task = asyncio.create_task(fetch(section_url, c_session))
+                tasks.append(task)
                 # print(section.section)
-        print("Sections:", len(sections_map.keys()))
 
         end_sections_time = time.time()
-
-        # Get Section Info for Sections - Async
-        tasks = []
-
-        for url in sections_map.keys():
-            task = asyncio.create_task(fetch(url, c_session))
-            tasks.append(task)
         
         requests = await asyncio.gather(*tasks)
 
+        print("Sections:", len(sections))
+
         for i in range(len(requests)):
         # for response in requests:
-            section = sections_map[list(sections_map.keys())[i]]
+            section = sections[i]
             soup = BeautifulSoup(requests[i], "lxml")
             section_info = get_section_info_from_soup(soup)
 
@@ -190,11 +186,14 @@ async def main():
 
         print(session)
 
-
         print("Time elapsed Courses:", elapsed_courses_time)
         print("Time elapsed Sections:", elapsed_sections_time)
         print("Time elapsed Section Info:", elapsed_section_info_time)
         print("Time elapsed:", elapsed_time)
+
+        file_name = "./data/" + session + ".json"
+        f = open(file_name, "w")
+        f.write(jsonpickle.encode(subjects, unpicklable=False))
 
 if __name__ == "__main__":
     asyncio.run(main())

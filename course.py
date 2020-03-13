@@ -1,4 +1,5 @@
-class Course:
+class Course():
+
     def __init__(self):
         super().__init__()
 
@@ -23,3 +24,4 @@ def get_courses_description_and_credits_from_soup(soup):
     course_credits = soup.select(".content p")[1].get_text()
 
     return description, course_credits
+    
