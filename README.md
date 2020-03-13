@@ -1,6 +1,6 @@
 # UBC-Courses-Web-Scraper
 ## Motivation
-Initially this project was planned to replace UBC-Web-Scraper, a UBC-Courses scraper I previously wrote in JavaScript. The intention was to write more performant code and learn Python in the process, with the belief that optimizing standard Python code would be enough to make it run faster than my JavaScript implementation.
+Initially this project was planned to replace [UBC-Web-Scraper](https://github.com/qstevens/UBC-Web-Scraper), a UBC-Courses scraper I previously wrote in JavaScript. The intention was to write more performant code and learn Python in the process, with the belief that optimizing standard Python code would be enough to make it run faster than my JavaScript implementation.
 
 ## Performance
 After completing a synchronous implementation of the web scraper in Python, I realized it was quite slow, but that did not deter me as I though that it would perform significantly better after I sent the HTTP requests asynchronously. And while it did perform better than the sychnronous version, it lagged far behind the JavaScript implementation.
