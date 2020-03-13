@@ -1,17 +1,20 @@
-import requests
-import urllib.parse
-from bs4 import BeautifulSoup
-import json
-import jsonpickle
 import asyncio
-from aiohttp import ClientSession
+import json
 import time
+import urllib.parse
+
+import requests
+
+import jsonpickle
+from aiohttp import ClientSession
+from bs4 import BeautifulSoup
+from course import (Course, get_courses_description_and_credits_from_soup,
+                    get_courses_from_subjects_soup)
+from section import Section, get_section_info_from_soup, get_sections_from_soup
 from subject import Subject, get_subjects_from_soup
-from course import Course, get_courses_from_subjects_soup, get_courses_description_and_credits_from_soup
-from section import Section, get_sections_from_soup, get_section_info_from_soup
 
 
-def format_url(session = "", subject = "", course = "", section = "", pname = "subjarea", tname = ""):
+def format_url(session="", subject="", course="", section="", pname="subjarea", tname=""):
     root = "https://courses.students.ubc.ca/cs/courseschedule?"
 
     if session == "":
@@ -33,22 +36,24 @@ def format_url(session = "", subject = "", course = "", section = "", pname = "s
     if subject != "":
         params["tname"] = "subj-department"
         params["dept"] = subject
-    
+
     if course != "":
         params["tname"] = "subj-course"
         params["course"] = course
-        
+
     if section != "":
         params["tname"] = "subj-section"
         params["section"] = section
 
     return root + urllib.parse.urlencode(params)
 
+
 def get_url_soup(url):
     result = requests.get(url)
     src = result.content
     soup = BeautifulSoup(src, 'lxml')
     return soup
+
 
 def get_available_sessions(soup):
     session_dropdown_menu = soup.select('.breadcrumb .btn-group')[1]
@@ -57,6 +62,7 @@ def get_available_sessions(soup):
         "title"), session_dropdown_menu.select(".dropdown-menu a")))
 
     return available_sessions
+
 
 def prompt_session_selection(available_sessions):
     for idx, session in enumerate(available_sessions):
@@ -68,7 +74,7 @@ def prompt_session_selection(available_sessions):
             sid = int(input("Enter session to scrape: "))
         except ValueError:
             print("That is not a valid session. Pick a number between 0 and",
-                len(available_sessions)-1)
+                  len(available_sessions)-1)
             continue
         if (0 <= sid < len(available_sessions)):
             print("You have selected", available_sessions[sid])
@@ -78,10 +84,12 @@ def prompt_session_selection(available_sessions):
     session = available_sessions[sid]
     return session
 
+
 async def fetch(url, session):
     async with session.get(url) as response:
         assert response.status == 200
         return await response.read()
+
 
 async def main():
     async with ClientSession() as c_session:
@@ -121,49 +129,53 @@ async def main():
             # print(response.url)
             subject = subjects[i]
             subject_courses_soup = BeautifulSoup(requests[i], 'lxml')
-            subject.courses = get_courses_from_subjects_soup(subject_courses_soup)
+            subject.courses = get_courses_from_subjects_soup(
+                subject_courses_soup)
 
             # Save Course hrefs for Async Requests
             for course in subject.courses:
-                # print(course.course_name)                
+                # print(course.course_name)
                 courses.append(course)
-                course_url = format_url(session, course.subject_code, course.course_number)
+                course_url = format_url(
+                    session, course.subject_code, course.course_number)
                 task = asyncio.create_task(fetch(course_url, c_session))
                 tasks.append(task)
 
         end_courses_time = time.time()
-        
-        requests = await asyncio.gather(*tasks)        
+
+        requests = await asyncio.gather(*tasks)
 
         print("Courses:", len(courses))
         tasks = []
 
         for i in range(len(requests)):
-        # for response in requests:
+            # for response in requests:
             course = courses[i]
             # print(course.course_name)
             courses_soup = BeautifulSoup(requests[i], "lxml")
             course.sections = get_sections_from_soup(courses_soup)
 
             # Set Course Description and Credits for Course
-            course.description, course.course_credits = get_courses_description_and_credits_from_soup(courses_soup)
-            
+            course.description, course.course_credits = get_courses_description_and_credits_from_soup(
+                courses_soup)
+
             # Save Section hrefs for Async Requests
             for section in course.sections:
                 sections.append(section)
-                section_url = format_url(session, section.subject_code, section.course_number, section.section_number)
+                section_url = format_url(
+                    session, section.subject_code, section.course_number, section.section_number)
                 task = asyncio.create_task(fetch(section_url, c_session))
                 tasks.append(task)
                 # print(section.section)
 
         end_sections_time = time.time()
-        
+
         requests = await asyncio.gather(*tasks)
 
         print("Sections:", len(sections))
 
         for i in range(len(requests)):
-        # for response in requests:
+            # for response in requests:
             section = sections[i]
             soup = BeautifulSoup(requests[i], "lxml")
             section_info = get_section_info_from_soup(soup)
