@@ -1,15 +1,13 @@
-import grequests
-from gevent import monkey as curious_george
-curious_george.patch_all(thread=False, select=False)
 import requests
 import urllib.parse
 from bs4 import BeautifulSoup
-from subject import Subject, get_subjects_from_soup
-from course import Course, get_courses_from_subjects_soup, get_courses_description_and_credits_from_soup
-from section import Section, get_sections_from_soup, get_section_info_from_soup
 import asyncio
 from aiohttp import ClientSession
 import time
+from subject import Subject, get_subjects_from_soup
+from course import Course, get_courses_from_subjects_soup, get_courses_description_and_credits_from_soup
+from section import Section, get_sections_from_soup, get_section_info_from_soup
+
 
 def format_url(session = "", subject = "", course = "", section = "", pname = "subjarea", tname = ""):
     root = "https://courses.students.ubc.ca/cs/courseschedule?"
@@ -83,20 +81,6 @@ async def fetch(url, session):
         assert response.status == 200
         return await response.read()
 
-# async def run(urls):
-#     tasks = []
-
-#     # Fetch all responses within one Client session,
-#     # keep connection alive for all requests.
-#     async with ClientSession() as session:
-#         for url in urls:
-#             task = asyncio.create_task(fetch(url, session))
-#             tasks.append(task)
-
-#         # you now have all response bodies in this variable
-#         # print(responses)
-#         return await tasks
-
 async def main():
     async with ClientSession() as c_session:
 
@@ -123,17 +107,12 @@ async def main():
             # print(subject.code)
             subjects_map[format_url(session, subject.code)] = subject
         print("Subjects:", len(subjects_map.keys()))
-        
-        # rs = (grequests.get(u) for u in subjects_map.keys())
-        # requests = grequests.map(rs)
-
+      
         tasks = []
 
         for url in subjects_map.keys():
             task = asyncio.create_task(fetch(url, c_session))
             tasks.append(task)
-
-        # you now have all response bodies in this variable
 
         requests = await asyncio.gather(*tasks)
 
@@ -151,17 +130,12 @@ async def main():
 
         end_courses_time = time.time()
 
-        # Get all Sections for Courses - Async
-        # rs = (grequests.get(u) for u in courses_map.keys())
-        # requests = grequests.map(rs)
-                
+        # Get all Sections for Courses - Async     
         tasks = []
 
         for url in courses_map.keys():
             task = asyncio.create_task(fetch(url, c_session))
             tasks.append(task)
-
-        # you now have all response bodies in this variable
         
         requests = await asyncio.gather(*tasks)
 
@@ -189,8 +163,6 @@ async def main():
         for url in sections_map.keys():
             task = asyncio.create_task(fetch(url, c_session))
             tasks.append(task)
-
-        # you now have all response bodies in this variable
         
         requests = await asyncio.gather(*tasks)
 
