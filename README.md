@@ -12,5 +12,7 @@ The results of the asynchronous web scrapers are as follows:
 - Python - aiohttp: 163s
 - JavaScript - request-promise: 60s
 
+*Note: after charging my laptop the time for aiohttp implementation dropped to 88s, and request-promise to 37s
+
 ## Conclusion
 From these results I concluded that either I am missing an significant optimization for handling asynchronous requests in Python (which is possible because this is the first program I've written in Python) or that JavaScript runs much faster. Either way, this marks the end of the Python experiment for web scrapers for me.
