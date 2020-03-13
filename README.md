@@ -1,12 +1,11 @@
 # UBC-Courses-Web-Scraper
 ## Motivation
-Initially this project was planned to replace [UBC-Web-Scraper](https://github.com/qstevens/UBC-Web-Scraper), a UBC-Courses scraper I previously wrote in JavaScript. The intention was to write more performant code and learn Python in the process, with the belief that optimizing standard Python code would be enough to make it run faster than my JavaScript implementation.
+Initially this project was meant to replace [UBC-Web-Scraper](https://github.com/qstevens/UBC-Web-Scraper), a UBC-Courses scraper I previously wrote in JavaScript. The intention was to write more performant code and learn Python in the process, with the belief that optimizing standard Python code would make it run faster than my JavaScript implementation.
+
+## Realization
+After web scraper in synchronous Python code, I realized it was quite slow, but that did not deter me as I thought that it would perform significantly better after started sending HTTP requests asynchronously. And while this did perform better than the sychnronous version, it lagged far behind the JavaScript implementation. I though perhaps this may be due to the library I was using (grequests), so I looked into aiohttp. aiohttp performed about twice as well as grequests, but still not as good as JavaScript's request-promise.
 
 ## Performance
-After completing a synchronous implementation of the web scraper in Python, I realized it was quite slow, but that did not deter me as I though that it would perform significantly better after I sent the HTTP requests asynchronously. And while it did perform better than the sychnronous version, it lagged far behind the JavaScript implementation.
-
-
-## Results
 I tested the scrapers by running it on the UBC 2020S session. This set has a total of ~7000 pages to scrape. 
 The results of the asynchronous web scrapers are as follows:
 - Python - grequests: 360s
