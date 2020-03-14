@@ -2,7 +2,9 @@ import asyncio
 import json
 import time
 import urllib.parse
+
 import requests
+
 import jsonpickle
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
@@ -18,18 +20,17 @@ def format_url(session="", subject="", course="", section="", pname="subjarea", 
     if session != "":
         sessyr = session.split()[0]
         sesscd = session.split()[1][0]
+    else:
+        return root
 
     if subject != "":
-        params["tname"] = "subj-department"
-        params["dept"] = subject
+        tname = "subj-department"
 
     if course != "":
-        params["tname"] = "subj-course"
-        params["course"] = course
+        tname = "subj-course"
 
     if section != "":
-        params["tname"] = "subj-section"
-        params["section"] = section
+        tname = "subj-section"
 
     params = {
         "sessyr": sessyr,
