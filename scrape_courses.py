@@ -2,9 +2,7 @@ import asyncio
 import json
 import time
 import urllib.parse
-
 import requests
-
 import jsonpickle
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
@@ -17,21 +15,9 @@ from subject import Subject, get_subjects_from_soup
 def format_url(session="", subject="", course="", section="", pname="subjarea", tname=""):
     root = "https://courses.students.ubc.ca/cs/courseschedule?"
 
-    if session == "":
-        return root
-
-    sessyr = session.split()[0]
-    sesscd = session.split()[1][0]
-
-    params = {
-        "sessyr": sessyr,
-        "sesscd": sesscd,
-        "pname": pname,
-        "tname": tname,
-        "dept": subject,
-        "course": course,
-        "section": section
-    }
+    if session != "":
+        sessyr = session.split()[0]
+        sesscd = session.split()[1][0]
 
     if subject != "":
         params["tname"] = "subj-department"
@@ -45,15 +31,23 @@ def format_url(session="", subject="", course="", section="", pname="subjarea", 
         params["tname"] = "subj-section"
         params["section"] = section
 
-    return root + urllib.parse.urlencode(params)
+    params = {
+        "sessyr": sessyr,
+        "sesscd": sesscd,
+        "pname": pname,
+        "tname": tname,
+        "dept": subject,
+        "course": course,
+        "section": section
+    }
 
+    return root + urllib.parse.urlencode(params)
 
 def get_url_soup(url):
     result = requests.get(url)
     src = result.content
     soup = BeautifulSoup(src, 'lxml')
     return soup
-
 
 def get_available_sessions(soup):
     session_dropdown_menu = soup.select('.breadcrumb .btn-group')[1]
@@ -62,7 +56,6 @@ def get_available_sessions(soup):
         "title"), session_dropdown_menu.select(".dropdown-menu a")))
 
     return available_sessions
-
 
 def prompt_session_selection(available_sessions):
     for idx, session in enumerate(available_sessions):
@@ -84,12 +77,10 @@ def prompt_session_selection(available_sessions):
     session = available_sessions[sid]
     return session
 
-
 async def fetch(url, session):
     async with session.get(url) as response:
         assert response.status == 200
         return await response.read()
-
 
 async def main():
     async with ClientSession() as c_session:
@@ -146,8 +137,8 @@ async def main():
         requests = await asyncio.gather(*tasks)
 
         print("Courses:", len(courses))
-        tasks = []
 
+        tasks = []
         for i in range(len(requests)):
             # for response in requests:
             course = courses[i]
@@ -167,10 +158,9 @@ async def main():
                 task = asyncio.create_task(fetch(section_url, c_session))
                 tasks.append(task)
                 # print(section.section)
+        requests = await asyncio.gather(*tasks)
 
         end_sections_time = time.time()
-
-        requests = await asyncio.gather(*tasks)
 
         print("Sections:", len(sections))
 
@@ -202,6 +192,7 @@ async def main():
         print("Time elapsed Section Info:", elapsed_section_info_time)
         print("Time elapsed:", elapsed_time)
 
+        # save data to file
         file_name = "./data/" + session + ".json"
         f = open(file_name, "w")
         f.write(jsonpickle.encode(subjects, unpicklable=False))
