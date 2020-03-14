@@ -177,6 +177,7 @@ async def main():
         for i in range(len(requests)):
             # for response in requests:
             section = sections[i]
+            print(section.section)
             soup = BeautifulSoup(requests[i], "lxml")
             section_info = get_section_info_from_soup(soup)
 
@@ -188,8 +189,6 @@ async def main():
             section.currentlyRegistered = section_info.currentlyRegistered
             section.generalRemaining = section_info.generalRemaining
             section.restrictedRemaining = section_info.restrictedRemaining
-
-            # print(section.section)
 
         elapsed_courses_time = end_subjects_time - start_time
         elapsed_sections_time = end_sections_time - end_courses_time

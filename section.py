@@ -34,12 +34,12 @@ def get_sections_from_soup(soup):
     return sections
 
 def get_section_info_from_soup(soup):
-    section = Section()
-
-    section_table = soup.select(".table-striped")[0].find("thead")
+    section = Section()    
     section.building = None
     section.room = None
-    if section_table != None:
+
+    section_table = soup.select(".table-striped")[0].find("thead")
+    if section_table != None and soup.find("th", text="Term") != None:
         section_row = section_table.find_next_siblings("td")
         section.building = section_row[4].get_text()
         section.room = section_row[5].get_text()

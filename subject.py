@@ -12,7 +12,7 @@ def get_subjects_from_soup(soup):
 
         row_cols = row.select("td")
 
-        subject.title = row_cols[1].get_text()
+        subject.title = row_cols[1].get_text().strip()
         subject.faculty = row_cols[2].get_text()
         subject.code = None
         subject.link = None
