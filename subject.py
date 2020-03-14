@@ -22,8 +22,8 @@ def get_subjects_from_soup(soup):
             subject.code = row_cols[0].find("b").get_text().split()[0]
             subject.link = None
         else:
-            subject.code = row_cols[0].find("a").get_text()
-            subject.link = row_cols[0].find("a").get("href")
+            subject.code = a_tag.get_text()
+            subject.link = a_tag.get("href")
         subjects.append(subject)
 
     return subjects

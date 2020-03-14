@@ -10,21 +10,21 @@ def get_sections_from_soup(soup):
 
     for row in table_rows:
         section = Section()
-
-        section.section = row.select("td")[1].get_text()
+        row_info = row.select("td")
+        section.section = row_info[1].get_text()
         if section.section == "":
             continue
         section.subject_code = section.section.split()[0]
         section.course_number = section.section.split()[1]
         section.section_number = section.section.split()[2]
-        section.blocked = row.select("td")[0].get_text()
-        section.href = row.select("td")[1].find("a").get("href")
-        section.activity = row.select("td")[2].get_text()
-        section.term = row.select("td")[3].get_text()
-        section.interval = row.select("td")[4].get_text()
-        section.days = row.select("td")[5].get_text()
-        section.start = row.select("td")[6].get_text()
-        section.end = row.select("td")[7].get_text()
+        section.blocked = row_info[0].get_text()
+        section.href = row_info[1].find("a").get("href")
+        section.activity = row_info[2].get_text()
+        section.term = row_info[3].get_text()
+        section.interval = row_info[4].get_text()
+        section.days = row_info[5].get_text()
+        section.start = row_info[6].get_text()
+        section.end = row_info[7].get_text()
 
         comments_data = row.find(".section-comments .accordion-inner")
         section.comments = comments_data.get_text() if comments_data != None else ""

@@ -108,7 +108,6 @@ async def main():
 
         # Get all Courses for Subjects - Async
         for subject in subjects:
-            # print(subject.code)
             subject_url = format_url(session, subject.code)
             task = asyncio.create_task(fetch(subject_url, c_session))
             tasks.append(task)
@@ -118,7 +117,6 @@ async def main():
 
         tasks = []
         for i in range(len(requests)):
-            # print(response.url)
             subject = subjects[i]
             subject_courses_soup = BeautifulSoup(requests[i], 'lxml')
             subject.courses = get_courses_from_subjects_soup(
@@ -126,7 +124,6 @@ async def main():
 
             # Save Course hrefs for Async Requests
             for course in subject.courses:
-                # print(course.course_name)
                 courses.append(course)
                 course_url = format_url(
                     session, course.subject_code, course.course_number)
@@ -141,9 +138,7 @@ async def main():
 
         tasks = []
         for i in range(len(requests)):
-            # for response in requests:
             course = courses[i]
-            # print(course.course_name)
             courses_soup = BeautifulSoup(requests[i], "lxml")
             course.sections = get_sections_from_soup(courses_soup)
 
@@ -158,7 +153,6 @@ async def main():
                     session, section.subject_code, section.course_number, section.section_number)
                 task = asyncio.create_task(fetch(section_url, c_session))
                 tasks.append(task)
-                # print(section.section)
         requests = await asyncio.gather(*tasks)
 
         end_sections_time = time.time()
@@ -168,7 +162,6 @@ async def main():
         for i in range(len(requests)):
             # for response in requests:
             section = sections[i]
-            print(section.section)
             soup = BeautifulSoup(requests[i], "lxml")
             section_info = get_section_info_from_soup(soup)
 
