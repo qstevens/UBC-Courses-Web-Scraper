@@ -173,7 +173,7 @@ def save_sessions_to_file(sessions, session_subjects):
             f.write(jsonpickle.encode(session_subjects[i], unpicklable=False))
         
 
-async def main():
+async def scrape():
     timeout = aiohttp.ClientTimeout(total=20*60)
     async with aiohttp.ClientSession(timeout=timeout) as c_session:
         session_tasks = []
@@ -184,7 +184,6 @@ async def main():
         ubc_courses_url = format_url()
         course_schedule_soup = get_url_soup(ubc_courses_url)
         available_sessions = get_available_sessions(course_schedule_soup)
-        # session = prompt_session_selection(available_sessions)
 
         # Get course information with root subjects
         for session in available_sessions:
@@ -195,10 +194,8 @@ async def main():
 
         elapsed_time = time.time() - start_time
         print("Total time elapsed:", elapsed_time)
-
-        # save_sessions_to_file(available_sessions, session_subjects)
         
         return session_subjects
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(scrape())
